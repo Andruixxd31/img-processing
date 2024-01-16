@@ -6,10 +6,20 @@ import (
 	"github.com/andruixxd31/concurrency-basics/img-processing/internal/rabbitmq"
 )
 
-type RabbitMq struct {
-	rmq *rabbitmq.RabbitMQ
+type App struct {
+	Rmq *rabbitmq.RabbitMQ
 }
 
 func main() {
-	fmt.Println("Running rabbitmq")
+	Run()
+}
+
+func Run() {
+	fmt.Println("Starting service")
+	rmq := rabbitmq.NewRabbitMQService()
+
+	app := App{
+		Rmq: rmq,
+	}
+	app.Rmq.Connect()
 }
