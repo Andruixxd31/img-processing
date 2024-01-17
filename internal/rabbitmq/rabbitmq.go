@@ -7,8 +7,11 @@ import (
 )
 
 type Service interface {
-	Connect() error
-	DeclareQueue(queueName string) error
+	Connect()
+	DeclareQueue(queueName string)
+	DeclareExchange(exchangeName string)
+	SetBinding(queueName, routingKey, exchangeName string)
+	SetQos(prefetchCount int)
 }
 
 type RabbitMQ struct {
@@ -38,8 +41,8 @@ func (rmq *RabbitMQ) Connect() {
 
 func (rmq *RabbitMQ) DeclareQueue(queueName string) {
 	_, err := rmq.Channel.QueueDeclare(
-		"first",
-		false,
+		queueName,
+		true,
 		false,
 		false,
 		false,
@@ -48,6 +51,48 @@ func (rmq *RabbitMQ) DeclareQueue(queueName string) {
 
 	if err != nil {
 		failOnError(err, "Could not declare queue")
+	}
+}
+
+func (rmq *RabbitMQ) DeclareExchange(exchangeName string) {
+	err := rmq.Channel.ExchangeDeclare(
+		exchangeName,
+		"topic",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		failOnError(err, "Could not declare exchange")
+	}
+}
+
+func (rmq *RabbitMQ) SetBinding(queueName, routingKey, exchangeName string) {
+	err := rmq.Channel.QueueBind(
+		queueName,
+		routingKey,
+		exchangeName,
+		false,
+		nil,
+	)
+
+	if err != nil {
+		failOnError(err, "Could not declare exchange")
+	}
+}
+
+func (rmq *RabbitMQ) SetQos(prefetchCount int) {
+	err := rmq.Channel.Qos(
+		1,
+		0,
+		false,
+	)
+
+	if err != nil {
+		failOnError(err, "Could not set Qos")
 	}
 }
 
